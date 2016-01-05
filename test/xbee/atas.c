@@ -160,7 +160,6 @@ int main( int argc, char *argv[])
 		}
 		else if (! strcmpi( cmdstr, "quit"))
 		{
-			xbee_ser_close(&XBEE_SERPORT);
 			return 0;
 		}
 		else if (! strncmpi( cmdstr, "AT", 2))
