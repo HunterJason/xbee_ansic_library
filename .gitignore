@@ -42,6 +42,7 @@ coverity
 samples/rabbit/main-node_discovery.c
 samples/rabbit/my_config.h
 test/posix/atas
+test/posix/serial
 test/posix/jsll_gen
 test/posix/t_jslong
 test/posix/xbee_timer_compare
