@@ -49,44 +49,44 @@ XBEE_BEGIN_DECLS
 enum xbee_frame_type {
 	/// Send an AT Command to the local device (see xbee_atcmd.c,
 	/// xbee_header_at_request_t). [ZigBee, DigiMesh]
-	XBEE_FRAME_LOCAL_AT_CMD					= 0x08,
+	XBEE_FRAME_LOCAL_AT_CMD			= 0x08,
 
 	/// Queue an AT command for batch processing on the local device.
 	/// [ZigBee, DigiMesh]
-	XBEE_FRAME_LOCAL_AT_CMD_Q				= 0x09,
+	XBEE_FRAME_LOCAL_AT_CMD_Q		= 0x09,
 
 	/// Send data to a default endpoint and cluster on a remote device.
 	/// [ZigBee, DigiMesh, not Smart Energy]
-	XBEE_FRAME_TRANSMIT						= 0x10,
+	XBEE_FRAME_TRANSMIT			= 0x10,
 
 	/// Send data to a specific endpoint and cluster on a remote device
 	/// (see xbee_wpan.c). [ZigBee, DigiMesh]
-	XBEE_FRAME_TRANSMIT_EXPLICIT			= 0x11,
+	XBEE_FRAME_TRANSMIT_EXPLICIT		= 0x11,
 
 	/// Send an AT command to a remote device on the network (see xbee_atcmd.c,
 	/// xbee_header_at_request_t). [ZigBee, DigiMesh, not Smart Energy]
-	XBEE_FRAME_REMOTE_AT_CMD				= 0x17,
+	XBEE_FRAME_REMOTE_AT_CMD		= 0x17,
 
 	/// Create Source Route (used with many-to-one routing) [ZigBee]
-	XBEE_FRAME_CREATE_SRC_ROUTE			= 0x21,
+	XBEE_FRAME_CREATE_SRC_ROUTE		= 0x21,
 
 	/// Register Joining Device (add device to trust center's key table)
 	/// [Smart Energy, coordinator]
-	XBEE_FRAME_REG_JOINING_DEV				= 0x24,
+	XBEE_FRAME_REG_JOINING_DEV		= 0x24,
 
 	/// Response from local device to AT Command (see xbee_atcmd.c,
 	/// xbee_cmd_response_t). [ZigBee, DigiMesh]
-	XBEE_FRAME_LOCAL_AT_RESPONSE			= 0x88,
+	XBEE_FRAME_LOCAL_AT_RESPONSE		= 0x88,
 
 	/// Current modem status (see xbee_frame_modem_status_t). [DigiMesh, ZigBee]
-	XBEE_FRAME_MODEM_STATUS					= 0x8A,
+	XBEE_FRAME_MODEM_STATUS			= 0x8A,
 
 	/// Frame sent upon completion of a Transmit Request. [DigiMesh, ZigBee]
-	XBEE_FRAME_TRANSMIT_STATUS				= 0x8B,
+	XBEE_FRAME_TRANSMIT_STATUS		= 0x8B,
 
 	/// Route Information Frame, sent for DigiMesh unicast transmissions with
 	/// NACK or Trace Route Enable transmit options set. [DigiMesh]
-	XBEE_FRAME_ROUTE_INFORMATION			= 0x8D,
+	XBEE_FRAME_ROUTE_INFORMATION		= 0x8D,
 
 	/// Output when a node receives an address update frame and modifies its
 	/// DH/DL registers. [DigiMesh]
@@ -94,30 +94,30 @@ enum xbee_frame_type {
 
 	/// Data received on the transparent serial cluster, when ATAO is set to 0.
 	/// [ZigBee, DigiMesh]
-	XBEE_FRAME_RECEIVE						= 0x90,		// ATAO == 0
+	XBEE_FRAME_RECEIVE			= 0x90,		// ATAO == 0
 
 	/// Data received for specific endpoint/cluster (see xbee_wpan.c), when
 	/// ATAO is non-zero. [ZigBee, DigiMesh]
-	XBEE_FRAME_RECEIVE_EXPLICIT			= 0x91,		// ATAO != 0
+	XBEE_FRAME_RECEIVE_EXPLICIT		= 0x91,		// ATAO != 0
 
 	/// [ZigBee, not Smart Energy]
-	XBEE_FRAME_IO_RESPONSE					= 0x92,
+	XBEE_FRAME_IO_RESPONSE			= 0x92,
 
 	/// [ZigBee, not Smart Energy]
-	XBEE_FRAME_SENDOR_READ					= 0x94,
+	XBEE_FRAME_SENDOR_READ			= 0x94,
 
 	/// [ZigBee, DigiMesh, not Smart Energy]
-	XBEE_FRAME_NODE_ID						= 0x95,
+	XBEE_FRAME_NODE_ID			= 0x95,
 
 	/// Response from remote device to AT Command (see xbee_atcmd.c,
 	/// xbee_cmd_response_t). [ZigBee, DigiMesh, not Smart Energy]
-	XBEE_FRAME_REMOTE_AT_RESPONSE			= 0x97,
+	XBEE_FRAME_REMOTE_AT_RESPONSE		= 0x97,
 
 	/// Over-the-Air Firmware Update Status [ZigBee, not Smart Energy]
-	XBEE_FRAME_FW_UPDATE_STATUS			= 0xA0,
+	XBEE_FRAME_FW_UPDATE_STATUS		= 0xA0,
 
 	/// Route records received in response to a Route Request. [ZigBee]
-	XBEE_FRAME_ROUTE_RECORD					= 0xA1,
+	XBEE_FRAME_ROUTE_RECORD			= 0xA1,
 
 	/// Information on device authenticated on Smart Energy network.
 	/// [Smart Energy, coordinator]
@@ -302,20 +302,20 @@ enum xbee_dev_flags
 	XBEE_DEV_FLAG_QUERY_BEGIN		= 0x0002,	///< started querying device
 	XBEE_DEV_FLAG_QUERY_DONE		= 0x0004,	///< querying completed
 	XBEE_DEV_FLAG_QUERY_ERROR		= 0x0008,	///< querying timed out or error
-	XBEE_DEV_FLAG_QUERY_REFRESH	= 0x0010,	///< need to re-query device
-	XBEE_DEV_FLAG_QUERY_INPROGRESS= 0x0020,	///< query is in progress
+	XBEE_DEV_FLAG_QUERY_REFRESH		= 0x0010,	///< need to re-query device
+	XBEE_DEV_FLAG_QUERY_INPROGRESS		= 0x0020,	///< query is in progress
 
 	XBEE_DEV_FLAG_IN_TICK			= 0x0080,	///< in xbee_dev_tick
 
 	XBEE_DEV_FLAG_COORDINATOR		= 0x0100,	///< Node Type is Coordinator
-	XBEE_DEV_FLAG_ROUTER				= 0x0200,	///< Node Type is Router
-	XBEE_DEV_FLAG_ENDDEV				= 0x0400,	///< Node Type is End Device
-	XBEE_DEV_FLAG_ZNET				= 0x0800,	///< Firmware is ZNet
-	XBEE_DEV_FLAG_ZIGBEE				= 0x1000,	///< Firmware is ZigBee
+	XBEE_DEV_FLAG_ROUTER			= 0x0200,	///< Node Type is Router
+	XBEE_DEV_FLAG_ENDDEV			= 0x0400,	///< Node Type is End Device
+	XBEE_DEV_FLAG_ZNET			= 0x0800,	///< Firmware is ZNet
+	XBEE_DEV_FLAG_ZIGBEE			= 0x1000,	///< Firmware is ZigBee
 	XBEE_DEV_FLAG_DIGIMESH			= 0x2000,	///< Firmware is DigiMesh
 
 	// (cast to int required by Codewarrior/HCS08 platform if enum is signed)
-	XBEE_DEV_FLAG_USE_FLOWCONTROL	= (int)0x8000,	///< Check CTS before sending
+	XBEE_DEV_FLAG_USE_FLOWCONTROL		= (int)0x8000,	///< Check CTS before sending
 };
 
 enum xbee_dev_mode {
@@ -349,7 +349,7 @@ typedef struct xbee_dev_t
 	wpan_dev_t		wpan_dev;
 
 	/// Platform-specific structure required by xbee_serial.c
-	xbee_serial_t	serport;
+	xbee_serial_t		serport;
 
 	/// Optional function to control reset pin.
 	xbee_reset_fn		reset;
@@ -358,23 +358,23 @@ typedef struct xbee_dev_t
 	xbee_is_awake_fn	is_awake;
 
 	/// Optional function to receive parsed Node ID messages.
-	xbee_disc_node_id_fn		node_id_handler;
+	xbee_disc_node_id_fn	node_id_handler;
 
 	/// Value of XBee module's HV register.
-	uint16_t				hardware_version;
+	uint16_t		hardware_version;
 	/** @name
 		Macros related to the \c hardware_version field of xbee_dev_t.
 		@{
 	*/
 		#define XBEE_HARDWARE_MASK				0xFF00
 		#define XBEE_HARDWARE_S1				0x1700
-		#define XBEE_HARDWARE_S1_PRO			0x1800
+		#define XBEE_HARDWARE_S1_PRO				0x1800
 		#define XBEE_HARDWARE_S2				0x1900
-		#define XBEE_HARDWARE_S2_PRO			0x1A00
-		#define XBEE_HARDWARE_900_PRO			0x1B00
-		#define XBEE_HARDWARE_868_PRO			0x1D00
-		#define XBEE_HARDWARE_S2B_PRO			0x1E00
-		#define XBEE_HARDWARE_S2C_PRO			0x2100
+		#define XBEE_HARDWARE_S2_PRO				0x1A00
+		#define XBEE_HARDWARE_900_PRO				0x1B00
+		#define XBEE_HARDWARE_868_PRO				0x1D00
+		#define XBEE_HARDWARE_S2B_PRO                   	0x1E00
+		#define XBEE_HARDWARE_S2C_PRO				0x2100
 		#define XBEE_HARDWARE_S2C				0x2200
 		#define XBEE_HARDWARE_S3B				0x2300
 		#define XBEE_HARDWARE_S8				0x2400
@@ -390,17 +390,17 @@ typedef struct xbee_dev_t
 		// Series 2 (2.4 GHz) hardware
 		#define XBEE_PROTOCOL_ZNET				0x1000
 		#define XBEE_PROTOCOL_ZB				0x2000
-		#define XBEE_PROTOCOL_SMARTENERGY	0x3000
-		#define XBEE_PROTOCOL_ZB_S2C			0x4000
-		#define XBEE_PROTOCOL_SE_S2C			0x5000
+		#define XBEE_PROTOCOL_SMARTENERGY			0x3000
+		#define XBEE_PROTOCOL_ZB_S2C				0x4000
+		#define XBEE_PROTOCOL_SE_S2C				0x5000
 		// Series 4 (900 MHz) hardware
-		#define XBEE_PROTOCOL_MESHLESS		0x1000
-		#define XBEE_PROTOCOL_DIGIMESH		0x8000
+		#define XBEE_PROTOCOL_MESHLESS				0x1000
+		#define XBEE_PROTOCOL_DIGIMESH				0x8000
 
 		#define XBEE_NODETYPE_MASK				0x0F00
-		#define XBEE_NODETYPE_COORD			0x0100
-		#define XBEE_NODETYPE_ROUTER			0x0300
-		#define XBEE_NODETYPE_ENDDEV			0x0900
+		#define XBEE_NODETYPE_COORD				0x0100
+		#define XBEE_NODETYPE_ROUTER				0x0300
+		#define XBEE_NODETYPE_ENDDEV				0x0900
 	//@}
 
 	/// Multi-purpose flags for tracking information about this device.
@@ -434,7 +434,7 @@ typedef struct xbee_dev_t
 
 	/// Current mode of the XBee device (e.g., boot loader, API, command).
 	#ifdef XBEE_DEVICE_ENABLE_ATMODE
-		enum xbee_dev_mode	mode;
+		enum xbee_dev_mode		mode;
 		uint32_t			mode_timer;		///< MS_TIMER value used for timeouts
 		uint16_t			guard_time;		///< value of GT (default 1000) * 1ms
 		uint16_t			idle_timeout;	///< value of CT (default 100) * 100ms

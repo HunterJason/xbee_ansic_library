@@ -9,7 +9,10 @@
 DEFINE = -DPOSIX \
 	-DXBEE_DEVICE_ENABLE_ATMODE \
 	-DXBEE_DEVICE_VERBOSE \
-#	-DXBEE_SERIAL_VERBOSE
+	-DXBEE_ATCMD_VERBOSE \
+	-DUSE_IMAX257
+	#-DXBEE_SERIAL_VERBOSE \
+
 # path for Coverity temp directory
 COVERITY_TEMP = /tmp/coverity
 
@@ -23,8 +26,9 @@ SRCDIR = ../../src
 # -MMD generates dependency files automatically, omitting system files
 # -MP creates phony targets for each prerequisite in a .d file
 
-COMPILE = gcc -iquote$(INCDIR) -g -MMD -MP -Wall $(DEFINE)
+COMPILE = arm-none-linux-gnueabi-gcc -iquote$(INCDIR) -g -MMD -MP -Wall $(DEFINE)
 
+#EXE = app
 EXE = zcl_write \
 		zcl_read \
 		zcl_24bit \
@@ -175,9 +179,9 @@ zigbee_OBJECTS = $(wpan_OBJECTS) zigbee_zcl.o zigbee_zdo.o zcl_types.o
 
 atinter_OBJECTS = _atinter.o
 
-atas_OBJECTS = $(xbee_OBJECTS) atas.o _atinter.o
+atas_OBJECTS = $(xbee_OBJECTS) atas.o _atinter.o 
 
-serial_OBJECTS = $(base_OBJECTS) serial.o #_atinter.o
+serial_OBJECTS = $(base_OBJECTS) serial.o 
 
 atas : $(atas_OBJECTS)
 	$(COMPILE) -o atas $(atas_OBJECTS)
@@ -315,13 +319,17 @@ coverity-push:
 	$(COMPILE) -c $<
 %.o : $(SRCDIR)/zigbee/%.c
 	$(COMPILE) -c $<
-%.o : $(SRCDIR)/posix/%.c
+#%.o : $(SRCDIR)/posix/%.c
+#	$(COMPILE) -c $<
+%.o : $(SRCDIR)/iMX257/%.c
 	$(COMPILE) -c $<
 %.o : $(SRCDIR)/util/%.c
 	$(COMPILE) -c $<
 
 # ...or in a samples/posix (for parse_serial_args.o)
 %.o : ../../samples/posix/%.c
+	$(COMPILE) -c $<
+%.o : ../../samples/common/%.c
 	$(COMPILE) -c $<
 
 # ...or in a samples/common (for _atinter.o)

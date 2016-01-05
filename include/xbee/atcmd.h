@@ -49,15 +49,15 @@ XBEE_BEGIN_DECLS
 /// (e.g., printf( "%.2s", foo.str)), easy copying (bar.w = foo.w) and
 /// easy comparison (bar.w == foo.w).
 typedef union xbee_at_cmd {
-	char		str[2];
+	char			str[2];
 	uint16_t		w;
 } xbee_at_cmd_t;
 
 // Values for ATEO command
 #define XBEE_CMD_ATEO_INSECURE_JOIN			(1<<0)
-#define XBEE_CMD_ATEO_USE_TRUST_CENTER		(1<<1)
-#define XBEE_CMD_ATEO_USE_HASH_LINK_KEY	(1<<2)
-#define XBEE_CMD_ATEO_USE_AUTHENTICATION	(1<<3)
+#define XBEE_CMD_ATEO_USE_TRUST_CENTER			(1<<1)
+#define XBEE_CMD_ATEO_USE_HASH_LINK_KEY			(1<<2)
+#define XBEE_CMD_ATEO_USE_AUTHENTICATION		(1<<3)
 
 // We need to declare struct _xbee_cmd_t here so the compiler doesn't treat it
 // as a local definition in the parameter lists for the function pointer
@@ -84,7 +84,7 @@ typedef struct xbee_cmd_response {
 
 	/// The AT Command (e.g., VR, NI) sent in the request that generated
 	/// this response.
-	xbee_at_cmd_t				command;
+	xbee_at_cmd_t					command;
 
 	/** Additional information about the response.  Perform a bitwise AND (&)
 		with the following values:
@@ -104,7 +104,7 @@ typedef struct xbee_cmd_response {
 		- #XBEE_CMD_RESP_ATND_RSSI_INVALID [DigiMesh only]
 			The RSSI field of the DigiMesh ATND response is not valid.
 	*/
-	uint16_t						flags;
+	uint16_t					flags;
 	/** @name
 		Macros used for \c flags field of xbee_cmd_response_t
 		@{
@@ -116,19 +116,19 @@ typedef struct xbee_cmd_response {
 
 	/// Number of bytes in .value_bytes or zero if there wasn't a value sent
 	/// with the response.
-	uint_fast8_t				value_length;
+	uint_fast8_t					value_length;
 
 	/// The value sent with the response; contains .value_length bytes.  Do not
 	/// modify the data pointed to by .value_bytes, it may be sent to more than
 	/// one callback.
-	const uint8_t		FAR	*value_bytes;
+	const uint8_t				FAR	*value_bytes;
 
 	/// The value sent with the response, if any, in host byte order.  Only set
 	/// if .value_length is 4 bytes or less.
-	uint32_t						value;
+	uint32_t					value;
 
 	/// Source of the response (NULL if a local AT command response)
-	const wpan_address_t	FAR	*source;
+	const wpan_address_t			FAR	*source;
 } xbee_cmd_response_t;
 
 /** @name
@@ -172,17 +172,17 @@ typedef int (*xbee_cmd_callback_fn)(
 typedef struct xbee_cmd_request {
 	/// Rolling identifier used to prevent use of stale request indicies.
 	/// Handle is a combination of index and this sequence byte.
-	uint8_t			sequence;
+	uint8_t						sequence;
 
 	/// Device that sent this request -- if we have a table for each XBee, this
 	/// element isn't necessary.  NULL if slot is empty.
-	xbee_dev_t		*device;
+	xbee_dev_t					*device;
 
 	/// expire entry if XBEE_CHECK_TIMEOUT_SEC(timeout) is true
-	uint16_t			timeout;
+	uint16_t					timeout;
 
 	/// combination of XBEE_CMD_FLAG_* macros
-	uint16_t			flags;
+	uint16_t					flags;
 	/** @name
 		@{
 	*/
@@ -199,7 +199,7 @@ typedef struct xbee_cmd_request {
 
 		/// mask of flags user can set (passed into xbee_cmd_set_flags)
 		#define XBEE_CMD_FLAG_USER_MASK	(XBEE_CMD_FLAG_QUEUE_CHANGE	\
-													|XBEE_CMD_FLAG_REUSE_HANDLE)
+						|XBEE_CMD_FLAG_REUSE_HANDLE)
 	//@}
 
 /*
@@ -217,7 +217,7 @@ typedef struct xbee_cmd_request {
 	uint8_t						param_length;
 
 	/// function to pass responses to
-	xbee_cmd_callback_fn		callback;
+	xbee_cmd_callback_fn				callback;
 
 	/// context to pass to callback function
 	void					FAR	*context;
@@ -227,23 +227,23 @@ typedef struct xbee_cmd_request {
 
 #ifndef XBEE_CMD_DISABLE_REMOTE
 	/// address of target device (64-bit IEEE and 16-bit network)
-	wpan_address_t				address;
+	wpan_address_t					address;
 #endif
 
 	/// command to send
-	xbee_at_cmd_t				command;
+	xbee_at_cmd_t					command;
 } xbee_cmd_request_t;
 
 /// Header for AT Commands sent to the local (serially-attached) XBee.
 typedef PACKED_STRUCT xbee_header_local_at_req {
 	/// #XBEE_FRAME_LOCAL_AT_CMD (0x08) or #XBEE_FRAME_LOCAL_AT_CMD_Q (0x09)
-	uint8_t				frame_type;
+	uint8_t						frame_type;
 
 	/// 1 to 255, or 0 to suppress the Transmit Status response
-	uint8_t				frame_id;
+	uint8_t						frame_id;
 
 	/// two-character AT Command
-	xbee_at_cmd_t		command;
+	xbee_at_cmd_t					command;
 } xbee_header_local_at_req_t;
 
 /// Header to AT Commands sent to a remote XBee on the network.
@@ -320,7 +320,7 @@ typedef PACKED_STRUCT xbee_header_local_at_resp {
 
 	/// ID from request, used to match response to request.
 	uint8_t				frame_id;
-	xbee_at_cmd_t		command;
+	xbee_at_cmd_t			command;
 
 	/// See enum #xbee_at_resp_status.  Note that DigiMesh uses the upper
 	/// nibble for additional flags -- use XBEE_AT_RESP_STATUS() macro when
@@ -340,10 +340,10 @@ typedef PACKED_STRUCT xbee_header_remote_at_resp {
 	addr64				ieee_address;
 
 	/// 16-bit network address (big-endian) of responder.
-	uint16_t				network_address_be;
+	uint16_t			network_address_be;
 
 	/// Command from original request.
-	xbee_at_cmd_t		command;
+	xbee_at_cmd_t			command;
 
 	/// See enum #xbee_at_resp_status.  Note that DigiMesh uses the upper
 	/// nibble for additional flags -- use XBEE_AT_RESP_STATUS() macro when
@@ -355,14 +355,14 @@ typedef PACKED_STRUCT xbee_header_remote_at_resp {
 /// Response to an AT Command sent to the local serially-connected XBee.
 typedef PACKED_STRUCT xbee_frame_local_at_resp {
 
-   xbee_header_local_at_resp_t header;
+   	xbee_header_local_at_resp_t 	header;
 	/// First byte of multi-byte value.
 	uint8_t				value[1];
 } xbee_frame_local_at_resp_t;
 
 /// Response to an AT Command sent to a remote XBee.
 typedef PACKED_STRUCT xbee_frame_remote_at_resp {
-   xbee_header_remote_at_resp_t header;
+   	xbee_header_remote_at_resp_t 	header;
 
 	/// First byte of multi-byte value.
 	uint8_t				value[1];
@@ -371,10 +371,10 @@ typedef PACKED_STRUCT xbee_frame_remote_at_resp {
 /// Useful typedef for casting either a local or remote response frame.
 typedef union xbee_frame_at_response {
 	/// First byte of header determines type (local or remote).
-	uint8_t								frame_type;
+	uint8_t				frame_type;
 
 	/// Use if .frame_type is #XBEE_FRAME_LOCAL_AT_RESPONSE.
-	xbee_frame_local_at_resp_t		local;
+	xbee_frame_local_at_resp_t	local;
 
 	/// Use if .frame_type is #XBEE_FRAME_REMOTE_AT_RESPONSE.
 	xbee_frame_remote_at_resp_t	remote;
@@ -408,8 +408,8 @@ struct xbee_atcmd_reg_t;	// forward
 */
 typedef void (*xbee_command_list_fn)(
 	const xbee_cmd_response_t FAR 		*response,
-   const struct xbee_atcmd_reg_t FAR	*reg,
-	void FAR										*base
+	const struct xbee_atcmd_reg_t FAR	*reg,
+	void FAR				*base
 );
 
 /**
@@ -434,12 +434,12 @@ enum xbee_command_list_status {
 typedef struct xbee_command_list_context_t {
 	/// Pointer to start of command list
 	const struct xbee_atcmd_reg_t FAR	*list;
-   /// Pointer to base address of data to populate with command responses
-   void FAR										*base;
-   /// Execution status
-   enum xbee_command_list_status			status;
-   /// Where we are in the command list (index of last entry submitted).
-   uint16_t										index;
+	/// Pointer to base address of data to populate with command responses
+	void FAR				*base;
+	/// Execution status
+	enum xbee_command_list_status		status;
+	/// Where we are in the command list (index of last entry submitted).
+	uint16_t				index;
 } xbee_command_list_context_t;
 
 
@@ -447,22 +447,22 @@ enum xbee_command_list_type {
 	XBEE_CLT_NONE,		///< No default action.  Often used for callbacks.
 	XBEE_CLT_COPY,		///< Copy response data byte-for-byte to base struct.
 	XBEE_CLT_COPY_BE,	///< Copy response, changing expected big-endian to
-   						///< host byte order, and store in base struct.
-                     ///< Data must be 1,2 or 4 bytes, assumed unsigned.
-   XBEE_CLT_SET,		///< Use data in base struct as parameter for command,
-   						///< with binary data copied byte-for-byte.
-   XBEE_CLT_SET_STR,	///< Use data in base struct as parameter for command,
-   						///< with null-terminated string data copied byte-for-byte.
-   XBEE_CLT_SET_BE,	///< Use data in base struct as parameter for command,
-   						///< changing host byte order to big-endian.
-                     ///< Data must be 1,2 or 4 bytes, assumed unsigned.
-   XBEE_CLT_SET_8,	///< Set value to immediate 8-bit constant in .bytes
-   						///< field of the xbee_atcmd_reg_t entry.  No response.
-   XBEE_CLT_LAST,		///< Last command, any response is discarded, no further
-   						///< command list entries are processed.  This is useful
-                     ///< if ND is the last command, since the command list
-                     ///< will terminate, but discovered nodes will be
-                     ///< handled subsequently (asynchronously).
+	///< host byte order, and store in base struct.
+	///< Data must be 1,2 or 4 bytes, assumed unsigned.
+	XBEE_CLT_SET,		///< Use data in base struct as parameter for command,
+	///< with binary data copied byte-for-byte.
+	XBEE_CLT_SET_STR,	///< Use data in base struct as parameter for command,
+	///< with null-terminated string data copied byte-for-byte.
+	XBEE_CLT_SET_BE,	///< Use data in base struct as parameter for command,
+	///< changing host byte order to big-endian.
+	///< Data must be 1,2 or 4 bytes, assumed unsigned.
+	XBEE_CLT_SET_8,	///< Set value to immediate 8-bit constant in .bytes
+	///< field of the xbee_atcmd_reg_t entry.  No response.
+	XBEE_CLT_LAST,		///< Last command, any response is discarded, no further
+	///< command list entries are processed.  This is useful
+	///< if ND is the last command, since the command list
+	///< will terminate, but discovered nodes will be
+	///< handled subsequently (asynchronously).
 };
 
 /**
@@ -471,18 +471,18 @@ enum xbee_command_list_type {
    Use #_XBEE_ATCMD_REG() to populate _xbee_atcmd_query_regs[].
 */
 typedef struct xbee_atcmd_reg_t {
-	xbee_at_cmd_t	command;				///< command to send to XBee device
-   uint8_t			flags;				///< Option flags (meaningful to callback)
-   enum xbee_command_list_type type;///< Type of processing
-   /** Callback function to be invoked when this command receives a response.
-       May be NULL, in which case a default processing function will be
-       invoked.  The default function will simply move \c bytes length
-       of data to \c offset in \c base (according to the \c type field).
-   */
-   xbee_command_list_fn	callback;
-	uint8_t			bytes;				///< number of bytes in response to copy
-   											///< or, for .type == XBEE_CLT_SET_8, is
-                                    ///< value to set.
+	xbee_at_cmd_t			command;			///< command to send to XBee device
+	uint8_t				flags;				///< Option flags (meaningful to callback)
+	enum xbee_command_list_type 	type;				///< Type of processing
+	/** Callback function to be invoked when this command receives a response.
+	  May be NULL, in which case a default processing function will be
+	  invoked.  The default function will simply move \c bytes length
+	  of data to \c offset in \c base (according to the \c type field).
+	 */
+	xbee_command_list_fn		callback;
+	uint8_t				bytes;				///< number of bytes in response to copy
+	///< or, for .type == XBEE_CLT_SET_8, is
+	///< value to set.
 	uint16_t			offset;				///< offset into base address to copy bytes
 } xbee_atcmd_reg_t;
 
@@ -494,13 +494,13 @@ typedef struct xbee_atcmd_reg_t {
 	@param[in]	c1		first character of AT command
 	@param[in]	c2		second character of AT command
 	@param[in]	type	one of xbee_command_list_type enumerated values:
-   						XBEE_CLT_NONE - no action except to issue the command.
-                        'obj' and 'field' parameters are ignored.
-							XBEE_CLT_COPY - copy response data directly
+   		     XBEE_CLT_NONE - no action except to issue the command.
+                        		'obj' and 'field' parameters are ignored.
+		     XBEE_CLT_COPY - copy response data directly
                      XBEE_CLT_COPY_BE - copy numeric data to host byte order
                      XBEE_CLT_SET - set command parameter directly
                      XBEE_CLT_SET_STR - set command parameter as null-
-                     	terminated string.
+                     			terminated string.
                      XBEE_CLT_SET_BE - set numeric command parameter
 	@param[in]	obj	typedef name of object at base address
 	@param[in]	field	field in obj in which to store result

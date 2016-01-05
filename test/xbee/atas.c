@@ -11,6 +11,7 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
 
 #include "../../samples/common/parse_serial_args.h"
 #include "../../samples/common/_atinter.h"
@@ -70,6 +71,7 @@ int xbee_disc_atas_response( xbee_dev_t *xbee, const void FAR *raw,
 const xbee_dispatch_table_entry_t xbee_frame_handlers[] =
 {
 	XBEE_FRAME_HANDLE_LOCAL_AT,
+	XBEE_FRAME_HANDLE_REMOTE_AT,
 	{ XBEE_FRAME_LOCAL_AT_RESPONSE, 0, xbee_disc_atas_response, NULL },
 	XBEE_FRAME_TABLE_END
 };
@@ -79,6 +81,7 @@ void print_menu( void)
 	puts( "help                 This list of options.");
 	puts( "as                   Initiate active scan.");
 	puts( "");
+	printATCmds(&my_xbee);
 }
 
 void active_scan( void)
@@ -95,11 +98,14 @@ void active_scan( void)
 */
 int main( int argc, char *argv[])
 {
-   char cmdstr[80];
+   	char cmdstr[80];
 	int status;
-	xbee_serial_t XBEE_SERPORT = { 115200, 0 };
-
-	parse_serial_arguments( argc, argv, &XBEE_SERPORT);
+#ifndef USE_IMAX257 
+	xbee_serial_t XBEE_SERPORT = { 9600, 0 , "/dev/ttyUSB0"};
+#else
+	xbee_serial_t XBEE_SERPORT = { 9600, 0 , "/dev/ttymxc2"};
+#endif
+	//parse_serial_arguments( argc, argv, &XBEE_SERPORT);
 
 	// initialize the serial and device layer for this XBee device
 	if (xbee_dev_init( &my_xbee, &XBEE_SERPORT, NULL, NULL))
@@ -111,12 +117,17 @@ int main( int argc, char *argv[])
 	// Initialize the AT Command layer for this XBee device and have the
 	// driver query it for basic information (hardware version, firmware version,
 	// serial number, IEEE address, etc.)
-	xbee_cmd_init_device( &my_xbee);
-	printf( "Waiting for driver to query the XBee device...\n");
+	
+	do {
+		status = xbee_cmd_init_device( &my_xbee);
+		printf("init device, status is:%d\r\n", status);
+		usleep(1000000);
+	} while( status );
+	printf( "init xbee status is:%d, Waiting for driver to query the XBee device...\n",status);
 	do {
 		xbee_dev_tick( &my_xbee);
 		status = xbee_cmd_query_status( &my_xbee);
-	} while (status == -EBUSY);
+	} while (status == -EBUSY);//(status != 0); //
 	if (status)
 	{
 		printf( "Error %d waiting for query to complete.\n", status);
@@ -132,32 +143,37 @@ int main( int argc, char *argv[])
 	print_menu();
 	active_scan();
 
-   while (1)
-   {
-      while (xbee_readline( cmdstr, sizeof cmdstr) == -EAGAIN)
-      {
-      	xbee_dev_tick( &my_xbee);
-      }
+	while (1)
+	{
+		while (xbee_readline( cmdstr, sizeof cmdstr) == -EAGAIN)
+		{
+			xbee_dev_tick( &my_xbee);
+		}
 
 		if (! strcmpi( cmdstr, "help") || ! strcmp( cmdstr, "?"))
 		{
 			print_menu();
 		}
 		else if (! strcmpi( cmdstr, "as"))
-      {
-      	active_scan();
-      }
-      else if (! strcmpi( cmdstr, "quit"))
-      {
+		{
+			active_scan();
+		}
+		else if (! strcmpi( cmdstr, "quit"))
+		{
+			xbee_ser_close(&XBEE_SERPORT);
 			return 0;
 		}
 		else if (! strncmpi( cmdstr, "AT", 2))
 		{
 			process_command( &my_xbee, &cmdstr[2]);
 		}
-	   else
-	   {
+		else if (! strncmpi( cmdstr, "RM", 2))
+		{
+			process_command2( &my_xbee, &cmdstr[2]);
+		}
+		else
+		{
 			printf( "unknown command: %s\n", cmdstr);
-	   }
-   }
+		}
+	}
 }

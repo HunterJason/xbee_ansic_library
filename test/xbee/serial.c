@@ -16,14 +16,18 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-
+#include <unistd.h>
 #include "xbee/platform.h"
 #include "xbee/cbuf.h"
 #include "xbee/serial.h"
 
-#include <conio.h>
+//#include <conio.h>
 
-xbee_serial_t ser;
+#ifndef USE_IMAX257
+xbee_serial_t ser = {115200, 0, "/dev/ttyUSB1"};
+#else
+xbee_serial_t ser = {115200, 0, "/dev/ttymxc2"};
+#endif
 
 
 /*
@@ -40,8 +44,9 @@ xbee_serial_t ser;
 int main( int argc, char *argv[])
 {
 	int rc;
-	char c;
-
+	char cmdstr[255];
+	char readstr[255];
+	int num;
 #if 0		// Variable COM port supported...
 	int i, rc;
 	char buffer[80];
@@ -66,7 +71,7 @@ int main( int argc, char *argv[])
 	}
 #endif
 
-	rc = xbee_ser_open(&ser, 115200);	// Baud rate
+	rc = xbee_ser_open(&ser, 9600);	// Baud rate
 
 	if (rc)
 	{
@@ -74,10 +79,6 @@ int main( int argc, char *argv[])
 		exit(1);
 	}
 
-	printf("Transmitter buffer free: %d\n", xbee_cbuf_free(ser.txbuf));
-	printf("Transmitter buffer used: %d\n", xbee_cbuf_used(ser.txbuf));
-	printf("Receiver buffer free: %d\n", xbee_cbuf_free(ser.rxbuf));
-	printf("Receiver buffer used: %d\n", xbee_cbuf_used(ser.rxbuf));
 
 	printf("Characters will be echoed if loopback.  Start typing.\n");
 	printf("Press ESC to exit.\n");
@@ -85,41 +86,27 @@ int main( int argc, char *argv[])
 
 	while (1)
 	{
-		if (kbhit())
+		while (xbee_readline( cmdstr, sizeof cmdstr) == -EAGAIN)
 		{
-			c = getch();
-			if (c == 27)
+			num = xbee_ser_read(&ser, readstr, 255);
+			if(num > 0)
 			{
-				break;
+				printf("read num :%d ,data is:%s\r\n",num, readstr);
+				memset(readstr,0,sizeof(readstr));
 			}
-			else if (c == '?')
-			{
-				printf("\nISR count=%hu, rent=%hu\n", ser.isr_count, ser.isr_rent);
-				printf("IER %02X IIR %02X LCR %02X MCR %02X LSR %02X MSR %02X\n"
-					, inp(ser.port + 1)
-					, inp(ser.port + 2)
-					, inp(ser.port + 3)
-					, inp(ser.port + 4)
-					, inp(ser.port + 5)
-					, inp(ser.port + 6)
-					);
-				printf("OE %hd, PE %hd, FE %hd, BI %hd\n",
-					ser.oe, ser.pe, ser.fe, ser.bi);
-				continue;
-			}
-			xbee_ser_putchar(&ser, c);
-			//outp(ser.port, c);
+			
 		}
-		rc = xbee_ser_getchar(&ser);
-		if (rc >= 0)
+		if (! strcmpi( cmdstr, "quit"))
 		{
-			putch(rc);
+			xbee_ser_close(&ser);
+			return 0;
 		}
+
+		printf("write string :%s, len is:%d\r\n",cmdstr,(int)strlen(cmdstr));
+		num = xbee_ser_write(&ser, cmdstr, strlen( cmdstr) );
+		printf("write num :%d\r\n",num);
 	}
 	xbee_ser_close(&ser);
-
 	return 0;
-
-
 }
 

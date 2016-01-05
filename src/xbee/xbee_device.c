@@ -123,7 +123,7 @@ uint8_t xbee_next_frame_id( xbee_dev_t *xbee)
 */
 _xbee_device_debug
 int xbee_dev_init( xbee_dev_t *xbee, const xbee_serial_t *serport,
-											xbee_is_awake_fn is_awake, xbee_reset_fn reset)
+			xbee_is_awake_fn is_awake, xbee_reset_fn reset)
 {
 	int error;
 
@@ -149,10 +149,10 @@ int xbee_dev_init( xbee_dev_t *xbee, const xbee_serial_t *serport,
 	error = xbee_ser_open( &xbee->serport, serport->baudrate);
 	if (! error)
 	{
-		error = xbee_ser_flowcontrol( &xbee->serport, 1);
+	//	error = xbee_ser_flowcontrol( &xbee->serport, 1);
 	}
 
-	xbee->flags = XBEE_DEV_FLAG_USE_FLOWCONTROL;
+//	xbee->flags = XBEE_DEV_FLAG_USE_FLOWCONTROL;
 
 	#ifdef XBEE_DEVICE_ENABLE_ATMODE
 		// fill in default values for GT, CT and CC registers
@@ -487,7 +487,7 @@ int xbee_frame_write( xbee_dev_t *xbee, const void FAR *header,
 	uint16_t headerlen, const void FAR *data, uint16_t datalen, uint16_t flags)
 {
 	PACKED_STRUCT {
-		uint8_t	start;
+		uint8_t		start;
 		uint16_t	length_be;
 	} prefix;
 
@@ -671,131 +671,125 @@ int _xbee_frame_load( xbee_dev_t *xbee)
 	            	return dispatched;
 	            }
 	         } while (ch != 0x7E);
-	         #ifdef XBEE_DEVICE_VERBOSE
-					printf( "%s: got start-of-frame\n", __FUNCTION__);
-	         #endif
+#ifdef XBEE_DEVICE_VERBOSE
+		 printf( "%s: got start-of-frame\n", __FUNCTION__);
+#endif
 	         xbee->rx.state = XBEE_RX_STATE_LENGTH_MSB;
 				// fall through to next state
 
-	   	case XBEE_RX_STATE_LENGTH_MSB:
-	   		// try to read a character from the serial port
-	   		if (xbee_ser_read( serport, &ch, 1) == 0)
-	   		{
-	   			return dispatched;
-	   		}
-				if (ch == 0x7E)
-				{
-					// MSB of length can never be 0x7E, consider it to be the new
-					// start-of-frame character and recheck for the length.
-					#ifdef XBEE_DEVICE_VERBOSE
-						printf( "%s: ignoring duplicate start-of-frame (0x7E)\n",
-							__FUNCTION__);
-					#endif
-					break;
-				}
-				// set MSB of frame length
-				xbee->rx.bytes_in_frame = ch << 8;
-				xbee->rx.state = XBEE_RX_STATE_LENGTH_LSB;
-			   // fall through to trying to read LSB of length
-	   	case XBEE_RX_STATE_LENGTH_LSB:
-	   		// try to read a character from the serial port
-	   		if (xbee_ser_read( serport, &ch, 1) == 0)
-	   		{
-	   			return dispatched;
-	   		}
+	      case XBEE_RX_STATE_LENGTH_MSB:
+		 // try to read a character from the serial port
+		 if (xbee_ser_read( serport, &ch, 1) == 0)
+		 {
+			 return dispatched;
+		 }
+		 if (ch == 0x7E)
+		 {
+			 // MSB of length can never be 0x7E, consider it to be the new
+			 // start-of-frame character and recheck for the length.
+#ifdef XBEE_DEVICE_VERBOSE
+			 printf( "%s: ignoring duplicate start-of-frame (0x7E)\n",
+					 __FUNCTION__);
+#endif
+			 break;
+		 }
+		 // set MSB of frame length
+		 xbee->rx.bytes_in_frame = ch << 8;
+		 xbee->rx.state = XBEE_RX_STATE_LENGTH_LSB;
+		 // fall through to trying to read LSB of length
+	      case XBEE_RX_STATE_LENGTH_LSB:
+		 // try to read a character from the serial port
+		 if (xbee_ser_read( serport, &ch, 1) == 0)
+		 {
+			 return dispatched;
+		 }
 
-	   		// set LSB of frame length, make local copy for range check
-				length = (xbee->rx.bytes_in_frame += ch);
-				if (length > XBEE_MAX_FRAME_LEN || length < 2)
-				{
-					// this isn't a valid frame, go back to looking for start marker
-					#ifdef XBEE_DEVICE_VERBOSE
-						printf( "%s: read bad frame length (%u ! [2 .. %u])\n",
-							__FUNCTION__, length, XBEE_MAX_FRAME_LEN);
-					#endif
-					if (ch == 0x7E)
-					{
-						// Handle case of 0x7E 0xXX 0x7E where second 0x7E is actual
-						// start of frame.
-						xbee->rx.state = XBEE_RX_STATE_LENGTH_MSB;
-					}
-					else
-					{
-						xbee->rx.state = XBEE_RX_STATE_WAITSTART;
-					}
-					break;
-				}
-	         #ifdef XBEE_DEVICE_VERBOSE
-					printf( "%s: got length %" PRIu16 "\n", __FUNCTION__, length);
-	         #endif
-				xbee->rx.state = XBEE_RX_STATE_RXFRAME;
-				xbee->rx.bytes_read = 0;
-				// fall through to next state
+		 // set LSB of frame length, make local copy for range check
+		 length = (xbee->rx.bytes_in_frame += ch);
+		 if (length > XBEE_MAX_FRAME_LEN || length < 2)
+		 {
+			 // this isn't a valid frame, go back to looking for start marker
+#ifdef XBEE_DEVICE_VERBOSE
+			 printf( "%s: read bad frame length (%u ! [2 .. %u])\n",
+					 __FUNCTION__, length, XBEE_MAX_FRAME_LEN);
+#endif
+			 if (ch == 0x7E)
+			 {
+				 // Handle case of 0x7E 0xXX 0x7E where second 0x7E is actual
+				 // start of frame.
+				 xbee->rx.state = XBEE_RX_STATE_LENGTH_MSB;
+			 }
+			 else
+			 {
+				 xbee->rx.state = XBEE_RX_STATE_WAITSTART;
+			 }
+			 break;
+		 }
+#ifdef XBEE_DEVICE_VERBOSE
+		 printf( "%s: got length %" PRIu16 "\n", __FUNCTION__, length);
+#endif
+		 xbee->rx.state = XBEE_RX_STATE_RXFRAME;
+		 xbee->rx.bytes_read = 0;
+		 // fall through to next state
 
 	      case XBEE_RX_STATE_RXFRAME:      // receiving frame & trailing checksum
-	      	bytes_left = xbee->rx.bytes_in_frame - xbee->rx.bytes_read + 1;
-				read = xbee_ser_read( serport,
-							xbee->rx.frame_data + xbee->rx.bytes_read, bytes_left);
-				if (read != bytes_left)
-				{
-					// Not enough bytes to finish reading current frame, record
-					// number of bytes read and return.
-					if (read > 0)
-					{
-						xbee->rx.bytes_read += read;
-					}
-					return dispatched;
-				}
+		 bytes_left = xbee->rx.bytes_in_frame - xbee->rx.bytes_read + 1;
+		 read = xbee_ser_read( serport,xbee->rx.frame_data + xbee->rx.bytes_read, bytes_left);
+		 if (read != bytes_left)
+		 {
+			 // Not enough bytes to finish reading current frame, record
+			 // number of bytes read and return.
+			 if (read > 0)
+			 {
+				 xbee->rx.bytes_read += read;
+			 }
+			 return dispatched;
+		 }
 
-            // ready to load more frames on next pass
-            xbee->rx.state = XBEE_RX_STATE_WAITSTART;
+		 // ready to load more frames on next pass
+		 xbee->rx.state = XBEE_RX_STATE_WAITSTART;
 
-				if (_xbee_checksum( xbee->rx.frame_data,
-														xbee->rx.bytes_in_frame + 1, 0xFF))
-				{
-					// checksum failed, throw out the frame
-					#ifdef XBEE_DEVICE_VERBOSE
-						printf( "%s: checksum failed\n", __FUNCTION__);
-						hex_dump( xbee->rx.frame_data, xbee->rx.bytes_in_frame + 1,
-							HEX_DUMP_FLAG_OFFSET);
-					#endif
+		 if (_xbee_checksum( xbee->rx.frame_data, xbee->rx.bytes_in_frame + 1, 0xFF))
+		 {
+			 // checksum failed, throw out the frame
+#ifdef XBEE_DEVICE_VERBOSE
+			 printf( "%s: checksum failed\n", __FUNCTION__);
+			 hex_dump( xbee->rx.frame_data, xbee->rx.bytes_in_frame + 1, HEX_DUMP_FLAG_OFFSET);
+#endif
 
-					/* At this point, we *could* look through the frame data for
-						another start-of-frame (0x7E) marker, including considering
-						the LSB of the length field.  We shouldn't have to though --
-						assuming a good serial connection, we should stay in sync
-						with XBee frames and not have to work too hard at resyncing.
+			 /* At this point, we *could* look through the frame data for
+			    another start-of-frame (0x7E) marker, including considering
+			    the LSB of the length field.  We shouldn't have to though --
+			    assuming a good serial connection, we should stay in sync
+			    with XBee frames and not have to work too hard at resyncing.
 
-						Also, we only sync to a select range of 3-byte sequences --
-						0x7E followed by two-byte length of 0 to about 300.
-					*/
+			    Also, we only sync to a select range of 3-byte sequences --
+			    0x7E followed by two-byte length of 0 to about 300.
+			  */
 
-					break;
-				}
-				else
-				{
-					// frame is ready for dispatch
-					++dispatched;
-					#ifdef XBEE_DEVICE_VERBOSE
-						printf( "%s: dispatch frame #%d\n", __FUNCTION__,
-							dispatched);
-					#endif
-					_xbee_frame_dispatch( xbee, xbee->rx.frame_data,
-																	xbee->rx.bytes_in_frame);
+			 break;
+		 }
+		 else
+		 {
+			 // frame is ready for dispatch
+			 ++dispatched;
+#ifdef XBEE_DEVICE_VERBOSE
+			 printf( "%s: dispatch frame #%d\n", __FUNCTION__, dispatched);
+#endif
+			 _xbee_frame_dispatch( xbee, xbee->rx.frame_data, xbee->rx.bytes_in_frame);
 
-					if (dispatched == XBEE_DEV_MAX_DISPATCH_PER_TICK)
-					{
-						return dispatched;
-					}
-				}
-	         break;
+			 if (dispatched == XBEE_DEV_MAX_DISPATCH_PER_TICK)
+			 {
+				 return dispatched;
+			 }
+		 }
+		 break;
 
-			default:
-				#ifdef XBEE_DEVICE_VERBOSE
-					printf( "%s: invalid state %d\n", __FUNCTION__,
-						xbee->rx.state);
-				#endif
-				xbee->rx.state = XBEE_RX_STATE_WAITSTART;
+	      default:
+#ifdef XBEE_DEVICE_VERBOSE
+		 printf( "%s: invalid state %d\n", __FUNCTION__, xbee->rx.state);
+#endif
+		 xbee->rx.state = XBEE_RX_STATE_WAITSTART;
 	   }
 	}
 }
@@ -883,8 +877,7 @@ void _xbee_dev_modem_status( wpan_dev_t *wpan, uint_fast8_t status)
 	@retval	>=0		number of handlers frame was dispatched to
 */
 _xbee_device_debug
-int _xbee_frame_dispatch( xbee_dev_t *xbee, const void FAR *frame,
-	uint16_t length)
+int _xbee_frame_dispatch( xbee_dev_t *xbee, const void FAR *frame, uint16_t length)
 {
 	uint_fast8_t frametype, frameid;
 	bool_t dispatched;

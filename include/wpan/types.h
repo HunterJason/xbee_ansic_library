@@ -32,7 +32,7 @@ XBEE_BEGIN_DECLS
 /// (big-endian) or _le (little-endian) where appropriate.  Add functions
 /// to convert 64-bit values between host byte order and big/little endian.
 typedef union {
-	uint8_t			b[8];
+	uint8_t				b[8];
 	uint16_t			u[4];
 	uint32_t			l[2];
 } addr64;
@@ -96,7 +96,7 @@ extern const addr64 _WPAN_IEEE_ADDR_COORDINATOR;
 /// Single structure to hold an 802.15.4 device's 64-bit IEEE/MAC address
 /// and 16-bit network address.
 typedef struct _wpan_address_t {
-	addr64		ieee;
+	addr64			ieee;
 	uint16_t		network;
 } wpan_address_t;
 

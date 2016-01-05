@@ -80,13 +80,13 @@ _xbee_atcmd_debug
 int xbee_cmd_tick( void)
 {
 	static uint8_t					last_time;
-	uint8_t							now;
+	uint8_t						now;
 	uint_fast8_t					i;
-	int								reuse;
-	xbee_cmd_request_t	FAR *request;
-	xbee_cmd_response_t			expired;
-	xbee_dev_t						*device;
-	int								count = 0;
+	int						reuse;
+	xbee_cmd_request_t				FAR *request;
+	xbee_cmd_response_t				expired;
+	xbee_dev_t					*device;
+	int						count = 0;
 
 	// only process expirations once per second
 	now = (uint8_t) xbee_seconds_timer();
@@ -193,75 +193,74 @@ xbee_cmd_request_t FAR *_xbee_cmd_handle_to_address( int16_t handle)
 	Helper function to send off the next command in the list.
 */
 _xbee_atcmd_debug
-int _xbee_cmd_issue_list( xbee_dev_t *xbee,
-									xbee_command_list_context_t FAR *clc,
-                           const xbee_cmd_response_t FAR *response
-									)
+int _xbee_cmd_issue_list( xbee_dev_t 				*xbee,
+			  xbee_command_list_context_t FAR 	*clc,
+                          const xbee_cmd_response_t FAR 	*response )
 {
-	uint8_t FAR 	*devptr;
-	int16_t			request;
+	uint8_t FAR 			*devptr;
+	int16_t				request;
 	uint32_t			param;
-   const xbee_atcmd_reg_t FAR *reg = clc->list + clc->index;
+	const xbee_atcmd_reg_t FAR 	*reg = clc->list + clc->index;
 
 #ifdef XBEE_ATCMD_VERBOSE
-   printf( "%s: next command AT%c%c\n", __FUNCTION__,
-         reg->command.str[0], reg->command.str[1]);
+	printf( "%s: next command AT%c%c\n", __FUNCTION__,
+			reg->command.str[0], reg->command.str[1]);
 #endif
-   if (response)
-   {
-   	request = response->handle;
-   }
-   else
-   {
-   	request = xbee_cmd_create( xbee, clc->list->command.str);
-      if (request < 0)
-      {
+	if (response)
+	{
+		request = response->handle;
+	}
+	else
+	{
+		request = xbee_cmd_create( xbee, clc->list->command.str);
+		if (request < 0)
+		{
 #ifdef XBEE_ATCMD_VERBOSE
-   		printf( "%s: can't create request (%d)\n", __FUNCTION__,
-         	request);
+			printf( "%s: can't create request (%d)\n", __FUNCTION__,
+					request);
 #endif
-      	return request;
-      }
-   }
+			return request;
+		}
+	}
 
 	xbee_cmd_set_command( request, reg->command.str);
 	devptr = (uint8_t FAR *)clc->base + reg->offset;
 	switch (reg->type)
 	{
-	   default:
-	      // This is not a setting command, clear the parameter.
-	      xbee_cmd_set_param_bytes( request, NULL, 0);
-	      break;
-	   case XBEE_CLT_SET_8:
-	      xbee_cmd_set_param( request, reg->bytes);
-	      break;
-	   case XBEE_CLT_SET:
-	      xbee_cmd_set_param_bytes( request, devptr, reg->bytes);
-	      break;
-	   case XBEE_CLT_SET_STR:
-	      xbee_cmd_set_param_str( request, (char FAR *)devptr);
-	      break;
-	   case XBEE_CLT_SET_BE:
-	      switch (reg->bytes)
-	      {
-	         default:
-	         case 1:
-	            param = *(uint8_t FAR *)devptr;
-	            break;
+		default:
+			// This is not a setting command, clear the parameter.
+			xbee_cmd_set_param_bytes( request, NULL, 0);
+			break;
+		case XBEE_CLT_SET_8:
+			xbee_cmd_set_param( request, reg->bytes);
+			break;
+		case XBEE_CLT_SET:
+			xbee_cmd_set_param_bytes( request, devptr, reg->bytes);
+			break;
+		case XBEE_CLT_SET_STR:
+			xbee_cmd_set_param_str( request, (char FAR *)devptr);
+			break;
+		case XBEE_CLT_SET_BE:
+			switch (reg->bytes)
+			{
+				default:
+				case 1:
+					param = *(uint8_t FAR *)devptr;
+					break;
 
-	         case 2:
-	            param = *(uint16_t FAR *)devptr;
-	            break;
+				case 2:
+					param = *(uint16_t FAR *)devptr;
+					break;
 
-	         case 4:
-	            param = *(uint32_t FAR *)devptr;
-	            break;
-	      }
-	      xbee_cmd_set_param( request, param);
-	      break;
+				case 4:
+					param = *(uint32_t FAR *)devptr;
+					break;
+			}
+			xbee_cmd_set_param( request, param);
+			break;
 	}
 
-   return request;
+	return request;
 }
 
 /**	@internal
@@ -282,12 +281,12 @@ int _xbee_cmd_issue_list( xbee_dev_t *xbee,
 _xbee_atcmd_debug
 int _xbee_cmd_list_callback( const xbee_cmd_response_t FAR *response)
 {
-	xbee_dev_t *xbee;
-	uint8_t FAR *devptr;
-	const xbee_atcmd_reg_t FAR *reg;
-   xbee_command_list_context_t FAR *clc = response->context;
+	xbee_dev_t 			*xbee;
+	uint8_t FAR 			*devptr;
+	const xbee_atcmd_reg_t FAR 	*reg;
+	xbee_command_list_context_t FAR *clc = response->context;
 
-	int16_t			request;
+	int16_t				request;
 	uint16_t			command;
 
 	xbee = response->device;
@@ -295,150 +294,150 @@ int _xbee_cmd_list_callback( const xbee_cmd_response_t FAR *response)
 	if (response->flags & XBEE_CMD_RESP_FLAG_TIMEOUT)
 	{
 #ifdef XBEE_ATCMD_VERBOSE
-		 printf( "%s: timed out\n", __FUNCTION__);
+		printf( "%s: timed out\n", __FUNCTION__);
 #endif
-   	clc->status = XBEE_COMMAND_LIST_TIMEOUT;
-      // Find 'end handler' callback...
+		clc->status = XBEE_COMMAND_LIST_TIMEOUT;
+		// Find 'end handler' callback...
 		for (reg = clc->list; XBEE_ATCMD_REG_VALID(reg); ++reg);
-   	if (reg->callback)
-      {
-      	// A final callback was specified (via XBEE_ATCMD_REG_END_CB)
+		if (reg->callback)
+		{
+			// A final callback was specified (via XBEE_ATCMD_REG_END_CB)
 #ifdef XBEE_ATCMD_VERBOSE
-		 	printf( "%s: found final callback\n", __FUNCTION__);
+			printf( "%s: found final callback\n", __FUNCTION__);
 #endif
-         reg->callback(response, reg, clc->base);
-      }
+			reg->callback(response, reg, clc->base);
+		}
 		return XBEE_ATCMD_DONE;			// give up
 	}
 
 	request = response->handle;
 	command = response->command.w;
 
-   reg = clc->list + clc->index;
+	reg = clc->list + clc->index;
 
 	// Basic sanity check that response was for the command we last issued
-   if (command == reg->command.w)
-   {
+	if (command == reg->command.w)
+	{
 #ifdef XBEE_ATCMD_VERBOSE
-      printf( "%s: matched command result AT%c%c\n", __FUNCTION__,
-            reg->command.str[0],reg->command.str[1]);
+		printf( "%s: matched command result AT%c%c\n", __FUNCTION__,
+				reg->command.str[0],reg->command.str[1]);
 #endif
-      // found it in the list, copy the response if status is success
-      if ((response->flags & XBEE_CMD_RESP_MASK_STATUS)
-                                                == XBEE_AT_RESP_SUCCESS)
-      {
-         // First do 'copy' action if specified, then do callback.
-         devptr = (uint8_t FAR *)clc->base + reg->offset;
-         switch (reg->type)
-         {
-            default:
-               // Was not a copy command.
-               break;
-            case XBEE_CLT_COPY:
-               // Copy minimum of response length and receiving field length
-               _f_memcpy( devptr, response->value_bytes,
-                  response->value_length < reg->bytes ?
-                     response->value_length : reg->bytes);
-               // Set the remainder, if any, to nulls
-               if (response->value_length < reg->bytes)
-               {
-                  _f_memset( devptr + response->value_length,
-                              0,
-                              reg->bytes - response->value_length);
-               }
-               break;
-            case XBEE_CLT_COPY_BE:
-               switch (reg->bytes)
-               {
-                  case 1:
-                     // Even though one byte doesn't technically need a
-                     // swap, support it here for convenience of truncating
-                     // a longer response value.
-                     *(uint8_t FAR *)devptr = (uint8_t) response->value;
-                     break;
+		// found it in the list, copy the response if status is success
+		if ((response->flags & XBEE_CMD_RESP_MASK_STATUS)
+				== XBEE_AT_RESP_SUCCESS)
+		{
+			// First do 'copy' action if specified, then do callback.
+			devptr = (uint8_t FAR *)clc->base + reg->offset;
+			switch (reg->type)
+			{
+				default:
+					// Was not a copy command.
+					break;
+				case XBEE_CLT_COPY:
+					// Copy minimum of response length and receiving field length
+					_f_memcpy( devptr, response->value_bytes,
+							response->value_length < reg->bytes ?
+							response->value_length : reg->bytes);
+					// Set the remainder, if any, to nulls
+					if (response->value_length < reg->bytes)
+					{
+						_f_memset( devptr + response->value_length,
+								0,
+								reg->bytes - response->value_length);
+					}
+					break;
+				case XBEE_CLT_COPY_BE:
+					switch (reg->bytes)
+					{
+						case 1:
+							// Even though one byte doesn't technically need a
+							// swap, support it here for convenience of truncating
+							// a longer response value.
+							*(uint8_t FAR *)devptr = (uint8_t) response->value;
+							break;
 
-                  case 2:
-                     *(uint16_t FAR *)devptr = (uint16_t) response->value;
-                     break;
+						case 2:
+							*(uint16_t FAR *)devptr = (uint16_t) response->value;
+							break;
 
-                  case 4:
-                     *(uint32_t FAR *)devptr = (uint32_t) response->value;
-                     break;
-               }
-               break;
-         }
-      }
-      if (reg->callback)
-      {
-         reg->callback(response, reg, clc->base);
-      }
-   }
-   else
-   {
-   	// Command did not match
-   	clc->status = XBEE_COMMAND_LIST_ERROR;
-	   if (reg->callback)
-	   {
-	      // A final callback was specified (via XBEE_ATCMD_REG_END_CB)
-         // Call with NULL reg, since this is an error and doesn't
-         // correspond to any list entry.
+						case 4:
+							*(uint32_t FAR *)devptr = (uint32_t) response->value;
+							break;
+					}
+					break;
+			}
+		}
+		if (reg->callback)
+		{
+			reg->callback(response, reg, clc->base);
+		}
+	}
+	else
+	{
+		// Command did not match
+		clc->status = XBEE_COMMAND_LIST_ERROR;
+		if (reg->callback)
+		{
+			// A final callback was specified (via XBEE_ATCMD_REG_END_CB)
+			// Call with NULL reg, since this is an error and doesn't
+			// correspond to any list entry.
 #ifdef XBEE_ATCMD_VERBOSE
 			printf( "%s: final callback (error proc)\n", __FUNCTION__);
 #endif
-	      reg->callback(response, NULL, clc->base);
-	   }
-		#ifdef XBEE_ATCMD_VERBOSE
-			if (response->value_length <= 4)
-			{
-				printf( "%s: Unexpected response AT%.*" PRIsFAR \
+			reg->callback(response, NULL, clc->base);
+		}
+#ifdef XBEE_ATCMD_VERBOSE
+		if (response->value_length <= 4)
+		{
+			printf( "%s: Unexpected response AT%.*" PRIsFAR \
 					" = 0x%0*" PRIX32 "\n",
 					__FUNCTION__, 2, response->command.str,
 					response->value_length * 2, response->value);
-			}
-			else
-			{
-				printf( "%s: Unexpected %d-byte response to AT%.*" PRIsFAR "\n",
-					__FUNCTION__, response->value_length, 2, response->command.str);
-			}
-		#endif
-      // Give up
-		return XBEE_ATCMD_DONE;
-   }
-
-   // Try next list entry
-   ++clc->index;
-   reg = clc->list + clc->index;
-   if (XBEE_ATCMD_REG_VALID(reg))
-   {
-      request = _xbee_cmd_issue_list( xbee, clc, response);
-
-	   xbee_cmd_send( request);
-
-	   if (reg->type == XBEE_CLT_LAST)
-	   {
-	      // Last command, with no response processing, so release
-	      // handle after sending.
-	      xbee_cmd_release_handle( request);
-	   }
+		}
 		else
 		{
-      	return XBEE_ATCMD_REUSE;         // keep this request alive
-      }
-   }
+			printf( "%s: Unexpected %d-byte response to AT%.*" PRIsFAR "\n",
+					__FUNCTION__, response->value_length, 2, response->command.str);
+		}
+#endif
+		// Give up
+		return XBEE_ATCMD_DONE;
+	}
+
+	// Try next list entry
+	++clc->index;
+	reg = clc->list + clc->index;
+	if (XBEE_ATCMD_REG_VALID(reg))
+	{
+		request = _xbee_cmd_issue_list( xbee, clc, response);
+
+		xbee_cmd_send( request);
+
+		if (reg->type == XBEE_CLT_LAST)
+		{
+			// Last command, with no response processing, so release
+			// handle after sending.
+			xbee_cmd_release_handle( request);
+		}
+		else
+		{
+			return XBEE_ATCMD_REUSE;         // keep this request alive
+		}
+	}
 
 	// Got through to end of list.
 #ifdef XBEE_ATCMD_VERBOSE
-   printf( "%s: done\n", __FUNCTION__);
+	printf( "%s: done\n", __FUNCTION__);
 #endif
-   clc->status = XBEE_COMMAND_LIST_DONE;
-   if (reg->callback)
-   {
-      // A final callback was specified (via XBEE_ATCMD_REG_END_CB)
+	clc->status = XBEE_COMMAND_LIST_DONE;
+	if (reg->callback)
+	{
+		// A final callback was specified (via XBEE_ATCMD_REG_END_CB)
 #ifdef XBEE_ATCMD_VERBOSE
-      printf( "%s: final callback\n", __FUNCTION__);
+		printf( "%s: final callback\n", __FUNCTION__);
 #endif
-      reg->callback(response, reg, clc->base);
-   }
+		reg->callback(response, reg, clc->base);
+	}
 
 	// Finished last command, tell dispatcher that we're done and it can delete
 	// the request entry.
@@ -470,29 +469,29 @@ int _xbee_cmd_list_callback( const xbee_cmd_response_t FAR *response)
 */
 _xbee_atcmd_debug
 int xbee_cmd_list_execute(
-			xbee_dev_t *xbee,
- 			xbee_command_list_context_t FAR *clc,
-         const xbee_atcmd_reg_t FAR *list,
-         void FAR *base,
-			const wpan_address_t FAR *address
-         )
+				xbee_dev_t *xbee,
+				xbee_command_list_context_t FAR *clc,
+				const xbee_atcmd_reg_t FAR *list,
+				void FAR *base,
+				const wpan_address_t FAR *address
+			 )
 {
 	int16_t request;
 	int error;
 
-   clc->base = base;
-   clc->list = list;
-   clc->status = XBEE_COMMAND_LIST_RUNNING;
-   clc->index = 0;
+	clc->base = base;
+	clc->list = list;
+	clc->status = XBEE_COMMAND_LIST_RUNNING;
+	clc->index = 0;
 	request = _xbee_cmd_issue_list( xbee, clc, NULL);
 	if (request < 0)
 	{
 		return request;
 	}
-   if (address)
-   {
-   	xbee_cmd_set_target(request, &address->ieee, address->network);
-   }
+	if (address)
+	{
+		xbee_cmd_set_target(request, &address->ieee, address->network);
+	}
 	error = xbee_cmd_set_callback( request, _xbee_cmd_list_callback, clc);
 
 	return error ? error : xbee_cmd_send( request);
@@ -575,9 +574,9 @@ int xbee_cmd_init_device( xbee_dev_t *xbee)
 
 _xbee_atcmd_debug
 void _xbee_cmd_query_handle_eo(
-			const xbee_cmd_response_t FAR *response,
-   		const struct xbee_atcmd_reg_t FAR	*reg,
-			void FAR										*base
+			const xbee_cmd_response_t FAR 		*response,
+   			const struct xbee_atcmd_reg_t FAR	*reg,
+			void FAR				*base
 			)
 {
 	xbee_dev_t FAR *xbee = base;
@@ -607,9 +606,9 @@ void _xbee_cmd_query_handle_eo(
 
 _xbee_atcmd_debug
 void _xbee_cmd_query_handle_ai(
-			const xbee_cmd_response_t FAR *response,
-   		const struct xbee_atcmd_reg_t FAR	*reg,
-			void FAR										*base
+			const xbee_cmd_response_t FAR 		*response,
+   			const struct xbee_atcmd_reg_t FAR	*reg,
+			void FAR				*base
 			)
 {
 	xbee_dev_t FAR *xbee = base;
@@ -643,9 +642,9 @@ void _xbee_cmd_query_handle_ai(
 
 _xbee_atcmd_debug
 void _xbee_cmd_query_handle_end(
-			const xbee_cmd_response_t FAR *response,
-   		const struct xbee_atcmd_reg_t FAR	*reg,
-			void FAR										*base
+			const xbee_cmd_response_t FAR 		*response,
+   			const struct xbee_atcmd_reg_t FAR	*reg,
+			void FAR				*base
 			)
 {
 	#ifdef XBEE_ATCMD_VERBOSE
@@ -658,22 +657,22 @@ void _xbee_cmd_query_handle_end(
 	// query process completed (maybe not successfully, but it is done)
 	xbee->flags &= ~XBEE_DEV_FLAG_QUERY_INPROGRESS;
 
-   if (!reg)
-   {
-	   xbee->flags |= XBEE_DEV_FLAG_QUERY_ERROR;
-   }
-   else if (response->flags & XBEE_CMD_RESP_FLAG_TIMEOUT)
-   {
+	if (!reg)
+	{
 		xbee->flags |= XBEE_DEV_FLAG_QUERY_ERROR;
-	#ifdef XBEE_ATCMD_VERBOSE
-   	printf("%s: AT%c%c timed out!\n", __FUNCTION__,
-      			response->command.str[0], response->command.str[1]);
-   #endif
-   }
-   else
-   {
-	   xbee->flags |= XBEE_DEV_FLAG_QUERY_DONE;
-   }
+	}
+	else if (response->flags & XBEE_CMD_RESP_FLAG_TIMEOUT)
+	{
+		xbee->flags |= XBEE_DEV_FLAG_QUERY_ERROR;
+#ifdef XBEE_ATCMD_VERBOSE
+		printf("%s: AT%c%c timed out!\n", __FUNCTION__,
+				response->command.str[0], response->command.str[1]);
+#endif
+	}
+	else
+	{
+		xbee->flags |= XBEE_DEV_FLAG_QUERY_DONE;
+	}
 
 	if (xbee->flags & XBEE_DEV_FLAG_QUERY_ERROR)
 	{
@@ -786,20 +785,13 @@ int xbee_cmd_query_device( xbee_dev_t *xbee, uint_fast8_t refresh)
 		return 0;
 	}
 
-   error = xbee_cmd_list_execute(xbee,
-   								&_xbee_atcmd_query_regs_head,
-									_xbee_atcmd_query_regs + refresh,
-                           xbee, NULL);
+   	error = xbee_cmd_list_execute(xbee, &_xbee_atcmd_query_regs_head, _xbee_atcmd_query_regs + refresh, xbee, NULL);
 
 	// successfully started query
 	if (error == 0)
 	{
-		xbee->flags |= XBEE_DEV_FLAG_QUERY_BEGIN |
-							XBEE_DEV_FLAG_QUERY_INPROGRESS;
-		xbee->flags &=
-			~(XBEE_DEV_FLAG_QUERY_ERROR
-				| XBEE_DEV_FLAG_QUERY_DONE
-				| XBEE_DEV_FLAG_QUERY_REFRESH);
+		xbee->flags |= XBEE_DEV_FLAG_QUERY_BEGIN | XBEE_DEV_FLAG_QUERY_INPROGRESS;
+		xbee->flags &= ~(XBEE_DEV_FLAG_QUERY_ERROR | XBEE_DEV_FLAG_QUERY_DONE | XBEE_DEV_FLAG_QUERY_REFRESH);
 	}
 
 	return error;
@@ -829,7 +821,7 @@ int xbee_cmd_query_status( xbee_dev_t *xbee)
 
 	xbee_cmd_tick();
 
-   return xbee_cmd_list_status(&_xbee_atcmd_query_regs_head);
+	return xbee_cmd_list_status(&_xbee_atcmd_query_regs_head);
 }
 
 
@@ -916,8 +908,7 @@ int16_t xbee_cmd_create( xbee_dev_t *xbee, const char FAR command[3])
 	handle = (index << 8) | request->sequence;
 
 	// clear out most of the entry (preserve sequence)
-	_f_memset( &request->timeout, 0,
-					sizeof(*request) - offsetof(xbee_cmd_request_t, timeout));
+	_f_memset( &request->timeout, 0, sizeof(*request) - offsetof(xbee_cmd_request_t, timeout));
 
 	request->device = xbee;
 	// allow 2 seconds to finish building command and successfully send it
@@ -1052,8 +1043,7 @@ int xbee_cmd_set_command( int16_t handle, const char FAR command[3])
 
 */
 _xbee_atcmd_debug
-int xbee_cmd_set_callback( int16_t handle, xbee_cmd_callback_fn callback,
-	void FAR *context)
+int xbee_cmd_set_callback( int16_t handle, xbee_cmd_callback_fn callback, void FAR *context)
 {
 	xbee_cmd_request_t FAR *request;
 
@@ -1110,8 +1100,7 @@ int xbee_cmd_set_callback( int16_t handle, xbee_cmd_callback_fn callback,
 */
 
 _xbee_atcmd_debug
-int xbee_cmd_set_target( int16_t handle, const addr64 FAR *ieee,
-	uint16_t network_address)
+int xbee_cmd_set_target( int16_t handle, const addr64 FAR *ieee, uint16_t network_address)
 {
 #ifdef XBEE_CMD_DISABLE_REMOTE
 	return -ENOSYS;
@@ -1518,6 +1507,8 @@ int _xbee_cmd_handle_response( xbee_dev_t *xbee, const void FAR *rawframe,
 
 	wpan_address_t sender;
 
+	uint16_t testvalue;
+	uint32_t test_value;
 	#ifdef XBEE_ATCMD_VERBOSE
 		// variables used to dump responses that don't match a callback
 		uint8_t buffer[100];
@@ -1621,16 +1612,16 @@ int _xbee_cmd_handle_response( xbee_dev_t *xbee, const void FAR *rawframe,
 	}
 	else
 	{
-      if (is_local)
-      {
-      	response.source = NULL;
-      }
-      else
-      {
-      	sender.ieee = frame->remote.header.ieee_address;
-         sender.network = be16toh( frame->remote.header.network_address_be);
-      	response.source = &sender;
-      }
+		if (is_local)
+		{
+			response.source = NULL;
+		}
+		else
+		{
+			sender.ieee = frame->remote.header.ieee_address;
+			sender.network = be16toh( frame->remote.header.network_address_be);
+			response.source = &sender;
+		}
 		response.device = xbee;
 		response.context = request->context;
 		response.handle = (index << 8) | request->sequence;
@@ -1651,11 +1642,33 @@ int _xbee_cmd_handle_response( xbee_dev_t *xbee, const void FAR *rawframe,
 					break;
 
 				case 2:
-					response.value = be16toh( *(uint16_t FAR *)value);
+					//printf( "%s: uint16[0]  @%p response.value =  0x%04x\n", __FUNCTION__, (uint16_t *)value, *(uint16_t *)value);
+					//printf( "%s: uint8[0] @%p  response.value =  0x%02x\n", __FUNCTION__, (uint8_t *)value, *(uint8_t *)value);
+					//printf( "%s: uint8[1] @%p  response.value =  0x%02x\n", __FUNCTION__, (uint8_t *)value+1, *((uint8_t *)value+1));
+					testvalue = *(uint8_t *)value | (*((uint8_t *)value+1) & 0x00ff) << 8;
+					//printf( "%s: uint16[0]  @%p response.value =  0x%04x\n", __FUNCTION__, (uint16_t *)value, *(uint16_t *)value);
+					/* next two line are same effect on normal system board, but first line is abnormal on ZLG iMX257 board*/
+					//response.value = be16toh( *(uint16_t FAR *)value);
+					response.value = be16toh( *(uint16_t FAR *)&testvalue);
+					//printf("response.value after be16toh is :0x%04x\r\n", response.value);
 					break;
 
 				case 4:
-					response.value = be32toh( *(uint32_t FAR *)value);
+					//printf("uint32_t value = 0x%08x\r\n",*(uint32_t *)value);
+					//printf("uint8[0] value = 0x%02x\r\n", *(uint8_t *)value);
+					//printf("uint8[1] value = 0x%02x\r\n", *((uint8_t *)value+1));
+					//printf("uint8[2] value = 0x%02x\r\n", *((uint8_t *)value+2));
+					//printf("uint8[3] value = 0x%02x\r\n", *((uint8_t *)value+3));
+					
+ 					test_value = *(uint8_t *)value \
+							| (*((uint8_t *)value+1) & 0x00ff) << 8 \
+							| (*((uint8_t *)value+2) & 0x0000ff) << 16 \
+							| (*((uint8_t *)value+3) & 0x000000ff) << 24;
+					//printf("uint32_t value = 0x%08x\r\n",*(uint32_t *)value);
+					/* next two line are same effect on normal system board, but first line is abnormal on ZLG iMX257 board*/
+					//response.value = be32toh( *(uint32_t FAR *)value);
+					response.value = be32toh( *(uint32_t FAR *)&test_value);
+					//printf("response.value after be32toh is :0x%08x\r\n", response.value);
 					break;
 
 				default:
@@ -1664,10 +1677,10 @@ int _xbee_cmd_handle_response( xbee_dev_t *xbee, const void FAR *rawframe,
 			}
 		}
 
-		#ifdef XBEE_ATCMD_VERBOSE
-			printf( "%s: dispatch to handler @%p w/context %" PRIpFAR "\n",
+#ifdef XBEE_ATCMD_VERBOSE
+		printf( "%s: dispatch to handler @%p w/context %" PRIpFAR "\n",
 				__FUNCTION__, request->callback, response.context);
-		#endif
+#endif
 
 		if (request->callback( &response) == XBEE_ATCMD_REUSE)
 		{
@@ -1697,7 +1710,7 @@ int _xbee_cmd_handle_response( xbee_dev_t *xbee, const void FAR *rawframe,
 	@see xbee_frame_handler_fn()
 */
 _xbee_atcmd_debug
-int _xbee_cmd_modem_status( xbee_dev_t *xbee,
+int _xbee_cmd_modem_status( xbee_dev_t *xbee, 
 	const void FAR *payload, uint16_t length, void FAR *context)
 {
 	uint8_t status;
@@ -1762,12 +1775,11 @@ int _xbee_cmd_modem_status( xbee_dev_t *xbee,
 			xbee_cmd_execute()
 */
 _xbee_atcmd_debug
-int xbee_cmd_simple( xbee_dev_t *xbee, const char FAR command[3],
-	uint32_t value)
+int xbee_cmd_simple( xbee_dev_t *xbee, const char FAR command[3], uint32_t value)
 {
 	PACKED_STRUCT {
 		xbee_header_local_at_req_t	header;
-		uint8_t							param[4];
+		uint8_t				param[4];
 	} request;
 	uint16_t request_size;
 
@@ -1775,16 +1787,14 @@ int xbee_cmd_simple( xbee_dev_t *xbee, const char FAR command[3],
 	request.header.frame_id = 0;		// don't need a response
 	request.header.command.w = *(uint16_t FAR *)command;
 
-	request_size = sizeof(request.header) +
-		_xbee_cmd_encode_param( request.param, value);
+	request_size = sizeof(request.header) + _xbee_cmd_encode_param( request.param, value);
 
 	#ifdef XBEE_ATCMD_VERBOSE
 		printf( "%s: sending AT%.2s=%" PRIu32 " (0x%" PRIx32 "), frame ID 0\n",
-														__FUNCTION__, command, value, value);
+							__FUNCTION__, command, value, value);
 	#endif
 
-	return xbee_frame_write( xbee, &request, request_size, NULL, 0,
-																		XBEE_DEV_FLAG_NONE);
+	return xbee_frame_write( xbee, &request, request_size, NULL, 0, XBEE_DEV_FLAG_NONE);
 }
 
 
@@ -1820,8 +1830,7 @@ int xbee_cmd_simple( xbee_dev_t *xbee, const char FAR command[3],
 			xbee_cmd_set_param_bytes(), xbee_cmd_set_param_str(), xbee_cmd_simple()
 */
 _xbee_atcmd_debug
-int xbee_cmd_execute( xbee_dev_t *xbee, const char FAR command[3],
-	const void FAR *data, uint8_t length)
+int xbee_cmd_execute( xbee_dev_t *xbee, const char FAR command[3], const void FAR *data, uint8_t length)
 {
 	xbee_header_local_at_req_t	request;
 
@@ -1831,12 +1840,10 @@ int xbee_cmd_execute( xbee_dev_t *xbee, const char FAR command[3],
 	request.command.w = *(uint16_t FAR *)command;
 
 	#ifdef XBEE_ATCMD_VERBOSE
-		printf( "%s: sending AT%.2s, frame ID 0x%02x\n",
-												__FUNCTION__, command, request.frame_id);
+		printf( "%s: sending AT%.2s, frame ID 0x%02x\n",__FUNCTION__, command, request.frame_id);
 	#endif
 
-	return xbee_frame_write( xbee, &request, sizeof(request), data, length,
-																		XBEE_DEV_FLAG_NONE);
+	return xbee_frame_write( xbee, &request, sizeof(request), data, length, XBEE_DEV_FLAG_NONE);
 }
 
 /*** BeginHeader xbee_identify */

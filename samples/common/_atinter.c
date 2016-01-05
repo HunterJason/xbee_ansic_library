@@ -73,8 +73,7 @@ int parseParameter (const char *paramstr, int16_t request)
 			return -EINVAL;
 		}
 	}
-	else if (paramstr[0] == '0'
-		&& tolower( (unsigned char)paramstr[1]) == 'x')
+	else if (paramstr[0] == '0' && tolower( (unsigned char)paramstr[1]) == 'x')
 	{
 		// parse hex
 		length = 0;
@@ -128,8 +127,7 @@ int xbee_cmd_callback( const xbee_cmd_response_t FAR *response)
 			(status == XBEE_AT_RESP_ERROR) ? "general" :
 			(status == XBEE_AT_RESP_BAD_COMMAND) ? "bad command" :
 			(status == XBEE_AT_RESP_BAD_PARAMETER) ? "bad parameter" :
-			(status == XBEE_AT_RESP_TX_FAIL) ? "Tx failure" :
-														  "unknown error");
+			(status == XBEE_AT_RESP_TX_FAIL) ? "Tx failure" : "unknown error");
 		return XBEE_ATCMD_DONE;
 	}
 
@@ -171,11 +169,10 @@ int xbee_cmd_callback( const xbee_cmd_response_t FAR *response)
 	return XBEE_ATCMD_DONE;
 }
 
-void process_command_remote( xbee_dev_t *xbee, const char *cmdstr,
-			const addr64 FAR *ieee)
+void process_command_remote( xbee_dev_t *xbee, const char *cmdstr, const addr64 FAR *ieee)
 {
-   char cmdptr[2];
-   const char *param;
+	char cmdptr[2];
+	const char *param;
 	int16_t request;
 
 	if (! *cmdstr)
@@ -198,8 +195,7 @@ void process_command_remote( xbee_dev_t *xbee, const char *cmdstr,
 		// Note that strerror() expects the positive error value
 		// (what would have been stored in errno) so we have to
 		// negate the xbee_cmd_create() return value.
-      printf( "Error creating request: %d (%" PRIsFAR ") \n",
-      	request, strerror( -request));
+		printf( "Error creating request: %d (%" PRIsFAR ") \n", request, strerror( -request));
 	}
 	else
 	{
@@ -208,12 +204,13 @@ void process_command_remote( xbee_dev_t *xbee, const char *cmdstr,
 		{
 			++param;
 		}
-      if (parseParameter( param, request) == 0)
+		if (parseParameter( param, request) == 0)
 		{
-      	if (ieee)
-         {
-      		xbee_cmd_set_target( request, ieee, WPAN_NET_ADDR_UNDEFINED);
-         }
+			if (ieee)
+			{
+				//xbee_cmd_set_target( request, ieee, WPAN_NET_ADDR_UNDEFINED);
+				xbee_cmd_set_target( request, ieee, 0xF71B);
+			}
 			xbee_cmd_set_callback( request, xbee_cmd_callback, NULL);
 			xbee_cmd_send( request);
 		}
@@ -224,6 +221,18 @@ void process_command_remote( xbee_dev_t *xbee, const char *cmdstr,
 void process_command( xbee_dev_t *xbee, const char *cmdstr)
 {
 	process_command_remote(xbee, cmdstr, NULL);
+}
+
+void process_command2( xbee_dev_t *xbee, const char *cmdstr)
+{
+	addr64 addr;
+	const uint32_t DSH = 0x0013A200;
+	const uint32_t DSL = 0x40AEED25;
+	addr.l[0] = be32toh(DSH);
+	//addr.l[0] = 0x00A21300;
+	addr.l[1] = be32toh(DSL);
+	//addr.l[1] = 0x25EDAE40;
+	process_command_remote(xbee, cmdstr, &addr);
 }
 
 
@@ -409,7 +418,7 @@ void printATCmds( xbee_dev_t *xbee)
 {
    int i;
    int flags;
-	const command_t *command;
+   const command_t *command;
 
 	// Set flags to match commands from the command list that are valid for
 	// this XBee module.
@@ -422,40 +431,40 @@ void printATCmds( xbee_dev_t *xbee)
    	case XBEE_HARDWARE_900_PRO:
    		switch ((unsigned) (xbee->firmware_version & XBEE_PROTOCOL_MASK))
    		{
-   			case XBEE_PROTOCOL_DIGIMESH:
-					flags = FLAG_DIGIMESH900;
-					break;
+			case XBEE_PROTOCOL_DIGIMESH:
+				flags = FLAG_DIGIMESH900;
+				break;
 
-				default:
-					printf( "Only DigiMesh supported on this hardware.\n");
-					break;
-			}
-			break;
+			default:
+				printf( "Only DigiMesh supported on this hardware.\n");
+				break;
+		}
+		break;
 
-		case XBEE_HARDWARE_S2:
-		case XBEE_HARDWARE_S2_PRO:
-		case XBEE_HARDWARE_S2B_PRO:
-			switch ((unsigned) (xbee->firmware_version & XBEE_PROTOCOL_MASK))
-			{
-				case XBEE_PROTOCOL_ZNET:			flags |= FLAG_ZNET;		break;
-				case XBEE_PROTOCOL_ZB:				flags |= FLAG_ZB;			break;
-				case XBEE_PROTOCOL_SMARTENERGY:	flags |= FLAG_SE;			break;
-				default:
-					printf( "Unknown protocol for firmware version 0x%04x.\n",
-						xbee->firmware_version);
-					break;
-			}
-			switch ((unsigned) (xbee->firmware_version & XBEE_NODETYPE_MASK))
-			{
-				case XBEE_NODETYPE_COORD:	flags |= FLAG_COORDINATOR;		break;
-				case XBEE_NODETYPE_ROUTER:	flags |= FLAG_ROUTER;			break;
-				case XBEE_NODETYPE_ENDDEV:	flags |= FLAG_ENDDEV;			break;
-				default:
-					printf( "Unknown node type for firmware version 0x%04x.\n",
-						xbee->firmware_version);
-					break;
-			}
-			break;
+	case XBEE_HARDWARE_S2:
+	case XBEE_HARDWARE_S2_PRO:
+	case XBEE_HARDWARE_S2B_PRO:
+		switch ((unsigned) (xbee->firmware_version & XBEE_PROTOCOL_MASK))
+		{
+			case XBEE_PROTOCOL_ZNET:	flags |= FLAG_ZNET;			break;
+			case XBEE_PROTOCOL_ZB:		flags |= FLAG_ZB;			break;
+			case XBEE_PROTOCOL_SMARTENERGY:	flags |= FLAG_SE;			break;
+			default:
+							printf( "Unknown protocol for firmware version 0x%04x.\n",
+									xbee->firmware_version);
+							break;
+		}
+		switch ((unsigned) (xbee->firmware_version & XBEE_NODETYPE_MASK))
+		{
+			case XBEE_NODETYPE_COORD:	flags |= FLAG_COORDINATOR;		break;
+			case XBEE_NODETYPE_ROUTER:	flags |= FLAG_ROUTER;			break;
+			case XBEE_NODETYPE_ENDDEV:	flags |= FLAG_ENDDEV;			break;
+			default:
+							printf( "Unknown node type for firmware version 0x%04x.\n",
+									xbee->firmware_version);
+							break;
+		}
+		break;
    }
 
 	if (! flags)
@@ -473,7 +482,7 @@ void printATCmds( xbee_dev_t *xbee)
 				// only display commands that are valid for this XBee
 				printf( "  %s\t%s\n", command->command, command->desc);
 			}
-   	}
+		}
 	}
 
 	printf( "\n\n");

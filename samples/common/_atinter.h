@@ -23,6 +23,7 @@
 void process_command_remote( xbee_dev_t *xbee, const char *cmdstr,
 			const addr64 FAR *ieee);
 void process_command( xbee_dev_t *xbee, const char *cmdstr);
+void process_command2( xbee_dev_t *xbee, const char *cmdstr);
 void printATCmds( xbee_dev_t *xbee);
 
 enum {
@@ -43,15 +44,15 @@ typedef struct
 #define FLAG_OUTPUT_MASK		0x000F
 
 // store node type in next nibble
-#define FLAG_ENDDEV				0x0010
-#define FLAG_ROUTER				0x0020
+#define FLAG_ENDDEV			0x0010
+#define FLAG_ROUTER			0x0020
 #define FLAG_COORDINATOR		0x0040
 #define FLAG_ANYNODETYPE		(FLAG_ENDDEV | FLAG_ROUTER | FLAG_COORDINATOR)
 
 // store firmware type in upper byte
-#define FLAG_ZNET					0x0100
-#define FLAG_ZB					0x0200
-#define FLAG_SE					0x0400
+#define FLAG_ZNET			0x0100
+#define FLAG_ZB				0x0200
+#define FLAG_SE				0x0400
 // DigiMesh 900 is always router
 #define FLAG_DIGIMESH900		(0x0800 | FLAG_ROUTER)
 
