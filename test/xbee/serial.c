@@ -98,7 +98,6 @@ int main( int argc, char *argv[])
 		}
 		if (! strcmpi( cmdstr, "quit"))
 		{
-			xbee_ser_close(&ser);
 			return 0;
 		}
 
